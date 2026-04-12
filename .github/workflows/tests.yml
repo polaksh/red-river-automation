@@ -11,7 +11,7 @@ jobs:
     timeout-minutes: 15
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -19,7 +19,7 @@ jobs:
           python-version: "3.12"
 
       - name: Install uv
-        uses: astral-sh/setup-uv@v4
+        uses: astral-sh/setup-uv@v6
 
       - name: Install dependencies
         run: uv sync
@@ -57,10 +57,10 @@ jobs:
           done
           exit $FAILED
 
-      # Expected-failure demos — these SHOULD fail, don't affect the build
       - name: Run expected-failure demos
+        id: demos
         if: always()
-        run: uv run pytest -v -m "expected_failure" || true
+        run: uv run pytest -v -m "expected_failure"
 
       # Generate a combined report (default browser, all suites)
       - name: Generate HTML report
@@ -69,7 +69,7 @@ jobs:
 
       - name: Upload test reports
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: test-reports
           path: |
@@ -78,7 +78,7 @@ jobs:
 
       - name: Upload logs
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: test-logs
           path: logs/
@@ -87,7 +87,7 @@ jobs:
       - name: Check results
         if: always()
         run: |
-          if [ "${{ steps.api.outcome }}" = "failure" ] || [ "${{ steps.ui.outcome }}" = "failure" ]; then
+          if [ "${{ steps.api.outcome }}" = "failure" ] || [ "${{ steps.ui.outcome }}" = "failure" ] || [ "${{ steps.demos.outcome }}" = "failure" ]; then
             echo "::error::Tests failed. Check the reports above."
             exit 1
           fi
