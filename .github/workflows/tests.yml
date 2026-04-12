@@ -8,7 +8,7 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 15
 
     steps:
       - uses: actions/checkout@v4
@@ -25,21 +25,44 @@ jobs:
         run: uv sync
 
       - name: Install Playwright browsers
-        run: uv run playwright install --with-deps chromium
+        run: |
+          BROWSERS=$(python3 -c "import yaml; print(' '.join(yaml.safe_load(open('config.yaml'))['ui']['browsers']))")
+          for b in $BROWSERS; do
+            echo "==> Installing $b"
+            uv run playwright install --with-deps $b
+          done
 
-      # Run real tests — these must pass for the build to be green
+      # Run all real tests across all browsers. Each step runs to completion
+      # (if: always) so one failure doesn't skip the rest. Exit codes are
+      # tracked and used for the final pass/fail verdict.
+
       - name: Run API tests
+        id: api
+        if: always()
         run: uv run pytest steps/api/ -v -m "not expected_failure"
 
-      - name: Run UI tests
-        run: uv run pytest steps/ui/ -v -m "not expected_failure"
+      - name: Run UI tests (per browser)
+        id: ui
+        if: always()
+        run: |
+          BROWSERS=$(python3 -c "import yaml; print(' '.join(yaml.safe_load(open('config.yaml'))['ui']['browsers']))")
+          FAILED=0
+          for b in $BROWSERS; do
+            echo "==> Running UI tests on $b"
+            uv run pytest steps/ui/ -v -m "not expected_failure" \
+              --browser $b \
+              --html=report-$b.html --self-contained-html \
+              --junitxml=logs/results-$b.xml \
+              -o "junit_suite_name=ui-$b" || FAILED=1
+          done
+          exit $FAILED
 
-      # Run expected-failure demos separately — failures here don't break the build
-      - name: Run expected-failure demos (these SHOULD fail)
+      # Expected-failure demos — these SHOULD fail, don't affect the build
+      - name: Run expected-failure demos
         if: always()
         run: uv run pytest -v -m "expected_failure" || true
 
-      # Generate full report including all tests (passing and expected failures)
+      # Generate a combined report (default browser, all suites)
       - name: Generate HTML report
         if: always()
         run: uv run pytest -v --html=report.html --self-contained-html || true
@@ -59,3 +82,12 @@ jobs:
         with:
           name: test-logs
           path: logs/
+
+      # Final verdict — fail the workflow if any real test step failed
+      - name: Check results
+        if: always()
+        run: |
+          if [ "${{ steps.api.outcome }}" = "failure" ] || [ "${{ steps.ui.outcome }}" = "failure" ]; then
+            echo "::error::Tests failed. Check the reports above."
+            exit 1
+          fi
