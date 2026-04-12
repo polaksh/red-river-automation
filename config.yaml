@@ -1,0 +1,47 @@
+# Central configuration for the Red River test automation framework.
+#
+# All externalized settings live here — URLs, timeouts, logging paths,
+# and API discovery parameters. Python code reads this via support/config.py.
+#
+# To override for a specific environment, copy this file and point to it
+# via the CONFIG_FILE environment variable:
+#   CONFIG_FILE=config.staging.yaml make test
+
+# -- UI test targets (demoblaze.com) ------------------------------------------
+
+ui:
+  base_url: "https://www.demoblaze.com"
+  # Playwright default timeout for actions and waits (milliseconds)
+  default_timeout_ms: 10000
+  # Browsers to run UI tests on. Single entry = one browser. Multiple = cross-browser.
+  # Supported: chromium, firefox, webkit
+  browsers:
+    - chromium
+
+
+# -- API test targets (Contact List app) --------------------------------------
+
+api:
+  base_url: "https://thinking-tester-contact-list.herokuapp.com"
+
+  # Postman collection URL for endpoint discovery.
+  # The framework fetches this on startup to build the endpoint registry.
+  # IDs breakdown:
+  #   4012288    — Postman workspace/user ID (from the published docs page)
+  #   TzK2bEa8  — Published collection ID
+  #   The environment UUID was found in the documenter page's HTML meta tags
+  postman_collection_url: >-
+    https://documenter.gw.postman.com/api/collections/4012288/TzK2bEa8
+    ?environment=4012288-0778d0f9-275d-4fd5-9059-df577ad7ab1b
+    &segregateAuth=true
+    &versionTag=latest
+
+  # Timeout for fetching the Postman collection (seconds).
+  # If this expires, the framework falls back to the bundled spec file.
+  postman_fetch_timeout_s: 10
+
+# -- Logging -------------------------------------------------------------------
+
+logging:
+  dir: "logs"
+  file: "logs/test_run.log"

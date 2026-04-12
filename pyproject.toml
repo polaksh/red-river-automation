@@ -1,0 +1,21 @@
+[project]
+name = "red-river-automation"
+version = "0.1.0"
+description = "Test automation framework — UI and API testing with Playwright + pytest-bdd"
+requires-python = ">=3.12"
+dependencies = [
+    "playwright",
+    "pytest",
+    "pytest-bdd",
+    "pytest-playwright",
+    "pytest-html",
+    "pyyaml",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+# This is a test project, not a library — tell hatch what to include
+[tool.hatch.build.targets.wheel]
+packages = ["support", "pages", "steps"]

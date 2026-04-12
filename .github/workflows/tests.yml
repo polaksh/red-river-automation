@@ -1,0 +1,61 @@
+name: Test Suite
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:  # manual trigger from GitHub UI
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v4
+
+      - name: Install dependencies
+        run: uv sync
+
+      - name: Install Playwright browsers
+        run: uv run playwright install --with-deps chromium
+
+      # Run real tests — these must pass for the build to be green
+      - name: Run API tests
+        run: uv run pytest steps/api/ -v -m "not expected_failure"
+
+      - name: Run UI tests
+        run: uv run pytest steps/ui/ -v -m "not expected_failure"
+
+      # Run expected-failure demos separately — failures here don't break the build
+      - name: Run expected-failure demos (these SHOULD fail)
+        if: always()
+        run: uv run pytest -v -m "expected_failure" || true
+
+      # Generate full report including all tests (passing and expected failures)
+      - name: Generate HTML report
+        if: always()
+        run: uv run pytest -v --html=report.html --self-contained-html || true
+
+      - name: Upload test reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-reports
+          path: |
+            report.html
+            report-*.html
+
+      - name: Upload logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-logs
+          path: logs/

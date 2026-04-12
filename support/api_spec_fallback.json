@@ -1,0 +1,102 @@
+{
+  "name": "Contact List API",
+  "source": "Postman collection (bundled fallback)",
+  "endpoints": [
+    {
+      "name": "Add Contact",
+      "method": "POST",
+      "path": "/contacts",
+      "auth": true,
+      "body_fields": ["firstName", "lastName", "birthdate", "email", "phone", "street1", "street2", "city", "stateProvince", "postalCode", "country"],
+      "response_status": 201
+    },
+    {
+      "name": "Get Contact List",
+      "method": "GET",
+      "path": "/contacts",
+      "auth": true,
+      "body_fields": [],
+      "response_status": 200
+    },
+    {
+      "name": "Get Contact",
+      "method": "GET",
+      "path": "/contacts/:id",
+      "auth": true,
+      "body_fields": [],
+      "response_status": 200
+    },
+    {
+      "name": "Update Contact (PUT)",
+      "method": "PUT",
+      "path": "/contacts/:id",
+      "auth": true,
+      "body_fields": ["firstName", "lastName", "birthdate", "email", "phone", "street1", "street2", "city", "stateProvince", "postalCode", "country"],
+      "response_status": 200
+    },
+    {
+      "name": "Update Contact (PATCH)",
+      "method": "PATCH",
+      "path": "/contacts/:id",
+      "auth": true,
+      "body_fields": ["firstName", "lastName", "birthdate", "email", "phone", "street1", "street2", "city", "stateProvince", "postalCode", "country"],
+      "response_status": 200
+    },
+    {
+      "name": "Delete Contact",
+      "method": "DELETE",
+      "path": "/contacts/:id",
+      "auth": true,
+      "body_fields": [],
+      "response_status": 200
+    },
+    {
+      "name": "Add User",
+      "method": "POST",
+      "path": "/users",
+      "auth": false,
+      "body_fields": ["firstName", "lastName", "email", "password"],
+      "response_status": 201
+    },
+    {
+      "name": "Get User Profile",
+      "method": "GET",
+      "path": "/users/me",
+      "auth": true,
+      "body_fields": [],
+      "response_status": 200
+    },
+    {
+      "name": "Update User",
+      "method": "PATCH",
+      "path": "/users/me",
+      "auth": true,
+      "body_fields": ["firstName", "lastName", "email", "password"],
+      "response_status": 200
+    },
+    {
+      "name": "Log Out User",
+      "method": "POST",
+      "path": "/users/logout",
+      "auth": true,
+      "body_fields": [],
+      "response_status": 200
+    },
+    {
+      "name": "Log In User",
+      "method": "POST",
+      "path": "/users/login",
+      "auth": false,
+      "body_fields": ["email", "password"],
+      "response_status": 200
+    },
+    {
+      "name": "Delete User",
+      "method": "DELETE",
+      "path": "/users/me",
+      "auth": true,
+      "body_fields": [],
+      "response_status": 200
+    }
+  ]
+}

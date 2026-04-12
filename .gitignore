@@ -36,6 +36,11 @@ MANIFEST
 pip-log.txt
 pip-delete-this-directory.txt
 
+# Test framework output
+logs/
+report.html
+report-*.html
+
 # Unit test / coverage reports
 htmlcov/
 .tox/
