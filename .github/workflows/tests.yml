@@ -9,6 +9,8 @@ jobs:
   test:
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
     steps:
       - uses: actions/checkout@v5
@@ -32,14 +34,17 @@ jobs:
             uv run playwright install --with-deps $b
           done
 
-      # Run all real tests across all browsers. Each step runs to completion
-      # (if: always) so one failure doesn't skip the rest. Exit codes are
-      # tracked and used for the final pass/fail verdict.
+      # Each step runs to completion (if: always) so one failure doesn't
+      # skip the rest. Exit codes are tracked for the final verdict.
 
       - name: Run API tests
         id: api
         if: always()
-        run: uv run pytest steps/api/ -v -m "not expected_failure"
+        run: |
+          uv run pytest steps/api/ -v -m "not expected_failure" \
+            --html=report-api.html --self-contained-html \
+            --junitxml=logs/results-api.xml \
+            -o "junit_suite_name=api"
 
       - name: Run UI tests (per browser)
         id: ui
@@ -51,8 +56,8 @@ jobs:
             echo "==> Running UI tests on $b"
             uv run pytest steps/ui/ -v -m "not expected_failure" \
               --browser $b \
-              --html=report-$b.html --self-contained-html \
-              --junitxml=logs/results-$b.xml \
+              --html=report-ui-$b.html --self-contained-html \
+              --junitxml=logs/results-ui-$b.xml \
               -o "junit_suite_name=ui-$b" || FAILED=1
           done
           exit $FAILED
@@ -60,21 +65,16 @@ jobs:
       - name: Run expected-failure demos
         id: demos
         if: always()
-        run: uv run pytest -v -m "expected_failure"
-
-      # Generate a combined report (default browser, all suites)
-      - name: Generate HTML report
-        if: always()
-        run: uv run pytest -v --html=report.html --self-contained-html || true
+        run: |
+          uv run pytest -v -m "expected_failure" \
+            --html=report-expected-failures.html --self-contained-html
 
       - name: Upload test reports
         if: always()
         uses: actions/upload-artifact@v5
         with:
           name: test-reports
-          path: |
-            report.html
-            report-*.html
+          path: report-*.html
 
       - name: Upload logs
         if: always()
@@ -83,7 +83,7 @@ jobs:
           name: test-logs
           path: logs/
 
-      # Final verdict — fail the workflow if any real test step failed
+      # Final verdict — fail the workflow if any test step failed
       - name: Check results
         if: always()
         run: |

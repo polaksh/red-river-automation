@@ -15,7 +15,8 @@ def pytest_configure(config):
     import platform
     os.makedirs(CONFIG.log_dir, exist_ok=True)
 
-    file_handler = logging.FileHandler(CONFIG.log_file, mode="w")
+    # append so multiple pytest runs (e.g., per-browser in CI) accumulate in one log
+    file_handler = logging.FileHandler(CONFIG.log_file, mode="a")
     file_handler.setLevel(logging.DEBUG)
     file_handler.setFormatter(
         logging.Formatter("%(asctime)s %(name)-14s %(message)s", datefmt="%H:%M:%S")
