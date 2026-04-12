@@ -26,7 +26,7 @@ jobs:
 
       - name: Install Playwright browsers
         run: |
-          BROWSERS=$(python3 -c "import yaml; print(' '.join(yaml.safe_load(open('config.yaml'))['ui']['browsers']))")
+          BROWSERS=$(uv run python3 -c "import yaml; print(' '.join(yaml.safe_load(open('config.yaml'))['ui']['browsers']))")
           for b in $BROWSERS; do
             echo "==> Installing $b"
             uv run playwright install --with-deps $b
@@ -45,7 +45,7 @@ jobs:
         id: ui
         if: always()
         run: |
-          BROWSERS=$(python3 -c "import yaml; print(' '.join(yaml.safe_load(open('config.yaml'))['ui']['browsers']))")
+          BROWSERS=$(uv run python3 -c "import yaml; print(' '.join(yaml.safe_load(open('config.yaml'))['ui']['browsers']))")
           FAILED=0
           for b in $BROWSERS; do
             echo "==> Running UI tests on $b"

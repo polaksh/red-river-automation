@@ -4,7 +4,8 @@ SHELL := /bin/bash
 PYTHON_MIN := 3.12
 PYTHON := $(shell command -v python3 2>/dev/null || command -v python 2>/dev/null)
 UV := $(shell command -v uv 2>/dev/null)
-BROWSERS := $(shell python3 -c "import yaml; print(' '.join(yaml.safe_load(open('config.yaml'))['ui']['browsers']))" 2>/dev/null || echo "chromium")
+# Lazy — evaluated when a target actually uses it (after deps are installed)
+BROWSERS = $(shell uv run python3 -c "import yaml; print(' '.join(yaml.safe_load(open('config.yaml'))['ui']['browsers']))" 2>/dev/null || echo "chromium")
 
 ifdef UV
   PYTEST := uv run pytest

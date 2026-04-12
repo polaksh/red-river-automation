@@ -187,7 +187,8 @@ if ($UseUv) {
 # ---------------------------------------------------------------------------
 
 # Install all browsers listed in config.yaml
-$ConfigBrowsers = (python -c "import yaml; print(' '.join(yaml.safe_load(open('config.yaml'))['ui']['browsers']))" 2>$null) -split ' '
+$BrowserCmd = if ($UseUv) { "uv run python3" } else { ".\.venv\Scripts\python" }
+$ConfigBrowsers = (Invoke-Expression "$BrowserCmd -c `"import yaml; print(' '.join(yaml.safe_load(open('config.yaml'))['ui']['browsers']))`"" 2>$null) -split ' '
 if (-not $ConfigBrowsers) { $ConfigBrowsers = @("chromium") }
 foreach ($b in $ConfigBrowsers) {
     Write-Host "==> Installing Playwright browser: $b"

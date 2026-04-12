@@ -98,8 +98,19 @@ Python should be platform agnostic, this implementation requires `Python 3.12` a
   However, should one want to explicitly run pure python and `venv` he can using the commands above
 
 ### CI
-An alternative to the above [local automation](#local-automation), Github workflow is [provided](../.github/workflows/tests.yml) to run this in a "CI-like" environemnt
-- this is a `manual_dispatch` trigger - i.e manual - it can only be triggered by users with `Write` permissions to the repo
-- the CI runs the tests cross-browser 
-- all reports are available for download in 1 zip file
-- to fix the intentionally failing tests a commit with a fix is required
+An alternative to the above [local automation](#local-automation), a Github Actions [workflow](../.github/workflows/tests.yml) is provided.
+
+- Triggers: `push` to main and `workflow_dispatch` (manual) — only users with `Write` permissions can trigger manually
+- Runs API tests once, then UI tests **once per browser** listed in [`config.yaml`](../config.yaml) (currently: chromium, firefox, webkit)
+- All steps run to completion — one browser or suite failing does not skip the rest
+- Expected-failure demos run separately and do not affect the pass/fail verdict
+- Reports are uploaded as downloadable artifacts:
+  - `report.html` — combined report (default browser)
+  - `report-chromium.html`, `report-firefox.html`, `report-webkit.html` — per-browser UI reports
+  - `logs/` — full execution logs
+
+> [!NOTE]
+> The browser list is driven by `config.yaml`, not hardcoded in the workflow. To change which browsers CI runs, edit the `ui.browsers` list in the config.
+
+> [!NOTE]
+> The intentionally failing tests (`@expected_failure`) will show as failed in the reports but do not fail the workflow. To fix them, see [Expected-Failure Demos](tests.md#expected-failure-demos).

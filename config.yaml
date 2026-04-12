@@ -17,6 +17,8 @@ ui:
   # Supported: chromium, firefox, webkit
   browsers:
     - chromium
+    - firefox
+    - webkit
 
 
 # -- API test targets (Contact List app) --------------------------------------
