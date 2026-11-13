@@ -16,4 +16,4 @@ Feature: Negative Test Demo (API)
   Scenario: Intentional failure fetching a nonexistent contact
     Given I am an authenticated API user
     When I get the contact with ID "000000000000000000000000"
-    Then the response contains the contact details
+    Then the response status is 404
