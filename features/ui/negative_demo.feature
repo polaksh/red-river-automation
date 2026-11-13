@@ -14,4 +14,4 @@ Feature: Negative Test Demo (UI)
   Scenario: Intentional assertion failure on product price
     Given I am on the home page
     When I click on the product "Samsung galaxy s6"
-    Then the product price is "$999.99"
+    Then the product price is "$360"
